@@ -1,3 +1,20 @@
+/**********************************************************************
+* COPYRIGHT 2018 MULTI-TECH SYSTEMS, INC.
+*
+* ALL RIGHTS RESERVED BY AND FOR THE EXCLUSIVE BENEFIT OF
+* MULTI-TECH SYSTEMS, INC.
+*
+* MULTI-TECH SYSTEMS, INC. - CONFIDENTIAL AND PROPRIETARY
+* INFORMATION AND/OR TRADE SECRET.
+*
+* NOTICE: ALL CODE, PROGRAM, INFORMATION, SCRIPT, INSTRUCTION,
+* DATA, AND COMMENT HEREIN IS AND SHALL REMAIN THE CONFIDENTIAL
+* INFORMATION AND PROPERTY OF MULTI-TECH SYSTEMS, INC.
+* USE AND DISCLOSURE THEREOF, EXCEPT AS STRICTLY AUTHORIZED IN A
+* WRITTEN AGREEMENT SIGNED BY MULTI-TECH SYSTEMS, INC. IS PROHIBITED.
+*
+***********************************************************************/
+
 #ifndef _FRAGMENTATION_MATH_H
 #define _FRAGMENTATION_MATH_H
 #ifdef FOTA
@@ -7,9 +24,15 @@
 #include "WriteFile.h"
 
 #define FRAG_SESSION_ONGOING    0xffffffff
+
 #ifndef MAX_PARITY
-#define MAX_PARITY 400
+#if defined(TARGET_MTS_MDOT_F411RE)
+#define MAX_PARITY 300
+#else
+#define MAX_PARITY 150
 #endif
+#endif
+
 class FragmentationMath
 {
   public:
@@ -17,6 +40,8 @@ class FragmentationMath
     ~FragmentationMath();
     bool Init();
     int getLostFrameCount();
+    int getTotalMissingFrameCount();
+    int getTotalRcvdFrameCount();
     void reset(uint16_t fcount);
     void setFrameFound(uint16_t frameCounter);
     bool processParityFrag(uint16_t frameCounter, uint8_t *pFrag);
@@ -30,7 +55,7 @@ class FragmentationMath
     void StoreRowInFlash(uint8_t *rowData, int index);
     void XorLineData(uint8_t *dataL1, uint8_t *dataL2, int size);
     void XorLineBit(uint8_t *dataL1, uint8_t *dataL2, int size);
-    void XorRowWithMatrix(uint8_t* row, int matrix_row_num); 
+    void XorRowWithMatrix(uint8_t* row, int matrix_row_num);
     void FragmentationGetParityMatrixRow(int N, int M, uint8_t *matrixRow);
     void CondenseRow(uint8_t *row, int row_number, int start);
     void ExpandAndXorRow(uint8_t *row, int row_number);
@@ -38,11 +63,13 @@ class FragmentationMath
     void CompleteRow(int row_num);
     void printMatrix();
 
-    uint8_t _frame_size; 
+    bool _initialized;
+    uint8_t _frame_size;
     uint16_t _frame_count;
     uint16_t _max_parity;
-    uint16_t numFramesMissing;
+    int16_t numFramesMissing;
     uint16_t lastReceiveFrameCnt;
+    int filled;
 
     uint8_t *matrix;
     uint8_t *matrixRow;
